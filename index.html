@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCE 102 — Stewardship and the Built Environment</title>
+
+  <!-- BYU brand typeface: IBM Plex Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+  <style>
+    /* ============================================================
+       BYU brand tokens (sourced from brand.byu.edu)
+       Do not modify these without confirming against current brand guide.
+       ============================================================ */
+    :root {
+      --byu-navy:        #002e5d;   /* primary brand color */
+      --byu-navy-dark:   #001832;
+      --byu-royal:       #0047ba;   /* secondary / links */
+      --byu-program:     #0062b8;
+      --byu-slate:       #2a2a2a;   /* charcoal / sub-brand secondary */
+      --byu-slate-soft:  #5a5f66;   /* slate gray for sub-brand accents */
+      --byu-page-heading-bg: #f6f6f8;
+      --byu-grey:        #f0efed;
+      --byu-white:       #ffffff;
+
+      /* derived semantic tokens for this page */
+      --ink:        #141414;
+      --muted:      #666666;
+      --line:       #e6e6e6;
+      --row-alt:    #fafbfc;
+
+      --max-width:  1240px;
+      --gutter:     20px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--byu-white);
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--byu-royal); }
+    a:hover { color: var(--byu-navy); }
+
+    /* ============================================================
+       Header / unit lockup
+       ============================================================ */
+    header.banner {
+      background: var(--byu-navy);
+      color: var(--byu-white);
+      padding: 32px var(--gutter) 28px;
+    }
+    .banner-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* Official BYU sub-brand lockup goes in this slot.
+       Replace assets/byu-cce-lockup.png with the approved file from
+       BYU Brand & Creative or your CCE communications manager.
+       Until that file is in place, the text fallback below is shown. */
+    .lockup {
+      flex: 0 0 auto;
+      min-height: 56px;          /* brand minimum height for the BYU monogram */
+      display: flex;
+      align-items: center;
+    }
+    .lockup img {
+      height: 64px;              /* slightly above brand minimum for primary-page presence */
+      width: auto;
+      display: block;
+    }
+    .lockup-fallback {
+      /* Clean text-only lockup — used until official artwork is dropped in.
+         Follows brand spirit (no fabricated monogram), provides clear hierarchy. */
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-right: 18px;
+      border-right: 1px solid rgba(255,255,255,0.25);
+    }
+    .lockup-fallback .byu-mark {
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+    .lockup-fallback .unit {
+      font-size: 0.78rem;
+      line-height: 1.2;
+      max-width: 16ch;
+      letter-spacing: 0.02em;
+      opacity: 0.92;
+    }
+
+    .titles { flex: 1 1 auto; min-width: 0; }
+    .course-code {
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 6px;
+    }
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 1.85rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .term {
+      margin: 0;
+      opacity: 0.85;
+      font-size: 0.92rem;
+      font-weight: 400;
+    }
+
+    /* ============================================================
+       Resources strip
+       ============================================================ */
+    .resources {
+      background: var(--byu-page-heading-bg);
+      border-bottom: 1px solid var(--line);
+      padding: 14px var(--gutter);
+    }
+    .resources-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 22px;
+      align-items: center;
+    }
+    .resources-label {
+      font-weight: 600;
+      color: var(--byu-navy);
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .resources a {
+      color: var(--byu-royal);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      border-bottom: 1px solid transparent;
+      transition: border-color 120ms;
+    }
+    .resources a:hover { border-bottom-color: var(--byu-royal); }
+    .resources a::after { content: " ↗"; opacity: 0.6; font-size: 0.85em; }
+
+    /* ============================================================
+       Main / schedule
+       ============================================================ */
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 28px var(--gutter) 60px;
+    }
+    .intro {
+      color: var(--muted);
+      font-size: 0.96rem;
+      margin: 0 0 22px;
+      max-width: 70ch;
+    }
+    .intro strong { color: var(--ink); font-weight: 600; }
+
+    .schedule-wrap {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--byu-white);
+    }
+    table.schedule {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+    }
+    table.schedule thead th {
+      background: var(--byu-navy);
+      color: var(--byu-white);
+      text-align: left;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    table.schedule tbody td {
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.schedule tbody tr:nth-child(even) td { background: var(--row-alt); }
+
+    /* Layout (width, alignment, numerics) shared between th + td.
+       Color is applied only to td so it doesn't clobber the white
+       <thead> color on the navy header band. */
+    table.schedule th.col-num,
+    table.schedule td.col-num { width: 56px; text-align: center; font-variant-numeric: tabular-nums; }
+    table.schedule td.col-num { color: var(--muted); }
+    table.schedule th.col-date,
+    table.schedule td.col-date { width: 130px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    table.schedule td.col-date { color: var(--byu-slate); }
+
+    /* Chapter color band — applied as the Date cell background so each
+       textbook chapter has a visually distinct vertical strip down the
+       calendar. !important is needed only to win over the zebra stripe
+       on alternate rows. */
+    table.schedule tbody tr.session td.col-date {
+      background: var(--chapter-color, transparent) !important;
+    }
+    table.schedule td.col-topic { font-weight: 600; color: var(--ink); }
+
+    .empty { color: #c5c8cc; user-select: none; }
+
+    /* Rows where homework is assigned that day — slate-gray accent + royal blue pill,
+       both pulled from the brand palette (no fabricated colors). */
+    tr.has-hw td:first-child {
+      box-shadow: inset 4px 0 0 var(--byu-slate-soft);
+    }
+    .hw-pill,
+    .bench-pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-right: 6px;
+      vertical-align: 1px;
+    }
+    .hw-pill { background: rgba(0, 71, 186, 0.10); color: var(--byu-royal); }
+    /* Project Benchmark pill uses the BYU "confirm" green to distinguish
+       project milestones from regular homework at a glance. */
+    .bench-pill { background: rgba(56, 135, 12, 0.10); color: #2a6a08; }
+
+    /* Estimated time column — narrow, right-aligned, tabular numerics */
+    table.schedule th.col-time,
+    table.schedule td.col-time { width: 90px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    table.schedule td.col-time { color: var(--byu-slate); }
+    /* Project Benchmarks column — slightly wider than HW since milestones often have longer titles */
+    table.schedule th.col-bench,
+    table.schedule td.col-bench { width: 160px; }
+
+    /* Inline links inside table cells inherit BYU royal */
+    table.schedule td a { color: var(--byu-royal); text-decoration: underline; text-underline-offset: 2px; }
+    table.schedule td a:hover { color: var(--byu-navy); }
+
+    /* ============================================================
+       Theme color stripe per session — wired to the flow diagram
+       above. Reads the sheet's Color column per row. When a row has
+       no theme color set, the stripe is transparent (invisible).
+       Pills inside the row carry the "something assigned" signal on
+       their own, so this stripe is reserved purely for the theme map.
+       ============================================================ */
+    table.schedule tbody tr.session td:first-child {
+      box-shadow: inset 6px 0 0 var(--theme-color, transparent);
+    }
+    /* Chip row under the topic — currently holds Chapter (Ch N) and
+       Theme chips. Each chip is small, muted, and inline so they
+       don't compete with the topic name. */
+    .chip-row { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .meta-chip,
+    .theme-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      text-transform: none;
+    }
+    /* Chapter chip — neutral text with a thin border */
+    .meta-chip {
+      padding: 0 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+    }
+    /* Theme chip — small color swatch + label */
+    .theme-chip::before {
+      content: "";
+      display: inline-block;
+      width: 9px; height: 9px;
+      border-radius: 2px;
+      background: var(--theme-color, var(--byu-grey));
+    }
+
+    /* Textbook section reference under the Preclass label */
+    .preclass-ref {
+      margin-top: 2px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================================
+       Theme/flow diagram section — sits above the schedule.
+       Displays the official image when present at
+       assets/theme-flow-diagram.{svg,png}; otherwise falls back to
+       the inline concept-map recreation below.
+       ============================================================ */
+    .theme-flow {
+      margin: 0 0 28px;
+      padding: 18px;
+      background: var(--byu-page-heading-bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .theme-flow .tf-title {
+      margin: 0 0 14px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--byu-navy);
+      text-align: center;
+    }
+    .theme-flow img,
+    .theme-flow object {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+    }
+    .theme-flow .theme-flow-caption {
+      margin: 10px 0 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* Inline concept-map fallback (always rendered behind the <img>).
+       Three concept zones side-by-side, with three Decision Framework
+       sub-cards in the center. Colors match the chapter color band
+       in the calendar below. */
+    .concept-map {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 1fr;
+      gap: 14px;
+      margin: 0 0 12px;
+    }
+    .cm-zone {
+      border-radius: 8px;
+      padding: 14px 14px 12px;
+      border: 1px solid var(--line);
+    }
+    .cm-zone h3 {
+      margin: 0 0 6px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--byu-navy);
+    }
+    .cm-zone .cm-sub { font-size: 0.78rem; color: var(--byu-slate); margin: 0 0 6px; }
+    .cm-zone ul { margin: 0 0 8px; padding-left: 18px; font-size: 0.8rem; color: var(--byu-slate); }
+    .cm-zone ul li { margin: 1px 0; }
+
+    /* Color the three concept zones to match the diagram + chapter band */
+    .cm-zone.stew    { background: #FAECE7; }          /* coral  — Ch 1 */
+    .cm-zone.deci    { background: #EDEDF0; }          /* gray   — Ch 5 */
+    .cm-zone.built   { background: #EFEAF7; }          /* lavender (Built Environment) */
+
+    /* Three-circle Venn diagram of the decision-framework dimensions */
+    .cm-venn {
+      display: block;
+      width: 100%;
+      max-width: 340px;
+      height: auto;
+      margin: 8px auto 0;
+      font-family: inherit;
+    }
+
+    .cm-capstone {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--byu-slate);
+    }
+    .cm-capstone strong { color: var(--byu-navy); font-weight: 600; }
+
+    @media (max-width: 760px) {
+      .concept-map { grid-template-columns: 1fr; }
+      .cm-frameworks { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    .state-row td {
+      padding: 28px 14px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .state-row.error td { color: #a60318; }   /* BYU danger color */
+
+    /* Unit grouping header — full-width band that breaks the table into
+       course-architecture sections (Introduction, Economics, etc.) */
+    tr.unit-header td {
+      background: var(--byu-page-heading-bg) !important;
+      color: var(--byu-navy);
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* Holiday rows — slim, muted dividers with no session number */
+    tr.holiday-row td {
+      background: #fafafa !important;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 8px 14px;
+      text-align: left;
+      border-top: 1px solid var(--line);
+    }
+    .holiday-label {
+      display: inline-block;
+      background: var(--byu-grey);
+      color: var(--byu-slate);
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-right: 10px;
+    }
+    .holiday-date {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================================
+       Footer
+       ============================================================ */
+    footer {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 18px var(--gutter) 40px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      border-top: 1px solid var(--line);
+    }
+    footer a { color: var(--byu-royal); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ============================================================
+       Mobile (≤720px) — table collapses to stacked cards
+       ============================================================ */
+    @media (max-width: 720px) {
+      header.banner { padding: 22px var(--gutter) 18px; }
+      .banner-inner { gap: 14px; }
+      .lockup-fallback { border-right: none; padding-right: 0; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+      h1 { font-size: 1.35rem; }
+
+      .schedule-wrap { border: none; background: transparent; }
+      table.schedule, table.schedule thead, table.schedule tbody,
+      table.schedule tr, table.schedule th, table.schedule td { display: block; }
+      table.schedule thead { display: none; }
+      table.schedule tbody tr {
+        background: var(--byu-white) !important;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin-bottom: 12px;
+        padding: 8px 4px;
+      }
+      table.schedule tbody td {
+        border: none;
+        padding: 6px 14px;
+        background: transparent !important;
+      }
+      table.schedule tbody td::before {
+        content: attr(data-label);
+        display: inline-block;
+        width: 88px;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 600;
+        vertical-align: top;
+      }
+      table.schedule td.col-num { text-align: left; width: auto; color: var(--byu-navy); font-weight: 700; }
+      /* On mobile each row is a card; the theme stripe lives on the
+         card edge instead of the first cell. Transparent fallback
+         keeps the card clean when no theme color is set. */
+      tr.session { box-shadow: inset 4px 0 0 var(--theme-color, transparent); }
+      tr.session td:first-child { box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="banner-inner">
+
+    <!-- ============================================================
+         OFFICIAL BYU SUB-BRAND LOCKUP
+         Replace `assets/byu-cce-lockup.png` with the approved artwork
+         provided by BYU Brand & Creative or your CCE college comms
+         manager. The image must be the official BYU + unit lockup —
+         do not edit, recolor, or otherwise modify it.
+         While the file is missing, the text fallback below is shown.
+         ============================================================ -->
+    <div class="lockup">
+      <img src="assets/byu-cce-lockup.svg"
+           alt="BYU Civil and Construction Engineering"
+           onerror="
+             if (this.src.endsWith('.svg')) { this.src = 'assets/byu-cce-lockup.png'; return; }
+             this.style.display = 'none';
+             this.nextElementSibling.style.display = 'flex';
+           ">
+      <div class="lockup-fallback" style="display:none;">
+        <div class="byu-mark">BYU</div>
+        <div class="unit">Civil &amp;<br>Construction<br>Engineering</div>
+      </div>
+    </div>
+
+    <div class="titles">
+      <div class="course-code">CCE 102 · Fall 2026</div>
+      <h1>Stewardship and the Built Environment</h1>
+      <p class="term">Course schedule &amp; topic plan</p>
+    </div>
+  </div>
+</header>
+
+<section class="resources">
+  <div class="resources-inner">
+    <span class="resources-label">Resources</span>
+    <a href="https://byu-transpolab.github.io/cce102/" target="_blank" rel="noopener">Online textbook</a>
+    <!-- Add more <a> elements here as additional course resources come online. -->
+  </div>
+</section>
+
+<main>
+  <p class="intro">
+    A semester-long introduction to the role of civil &amp; construction engineers as stewards of the built environment.
+    <strong>Topics, activities, and homework</strong> for each class meeting are listed below and updated as the course evolves.
+  </p>
+
+  <!-- ============================================================
+       Course interconnected theme & flow diagram.
+       If assets/theme-flow-diagram.{svg,png} is present, that image
+       displays above the inline concept map. Otherwise the inline
+       map below carries the same meaning. Either way, the colored
+       zones match the chapter color band in the schedule below.
+       ============================================================ -->
+  <section class="theme-flow" id="themeFlow">
+    <h2 class="tf-title">Stewardship and the Built Environment</h2>
+
+    <!-- Optional: official image overlay (auto-hidden if file is missing) -->
+    <img id="themeFlowImg"
+         src="assets/theme-flow-diagram.svg"
+         alt="Course interconnected theme and flow diagram"
+         style="display:none; margin-bottom: 12px;"
+         onerror="
+           if (this.src.endsWith('.svg')) { this.src = 'assets/theme-flow-diagram.png'; return; }
+           this.remove();
+         "
+         onload="this.style.display = 'block';">
+
+    <!-- Always-on inline concept-map fallback -->
+    <div class="concept-map">
+      <div class="cm-zone stew">
+        <h3>Stewardship</h3>
+        <p class="cm-sub"><strong>Why</strong></p>
+        <ul>
+          <li>Divine Creation</li>
+          <li>Global Flourishing</li>
+          <li>Discipleship</li>
+        </ul>
+        <p class="cm-sub"><strong>What capacity is needed</strong></p>
+        <ul>
+          <li>Moral &amp; Ethical Values</li>
+          <li>Leadership &amp; Teamwork</li>
+          <li>Global &amp; Cultural Awareness</li>
+        </ul>
+      </div>
+
+      <div class="cm-zone deci">
+        <h3>Decision Frameworks</h3>
+        <p class="cm-sub">How to understand and balance inputs and impacts in systems, across life-cycles</p>
+        <!-- Three-circle Venn diagram of the decision-framework dimensions.
+             d=80, r=60 (was d=70) — pulls circles slightly apart so the
+             triple-overlap zone in the middle is roughly 30% smaller.
+             Labels still sit inside each circle's exclusive lune. -->
+        <svg class="cm-venn" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg"
+             role="img"
+             aria-label="Three-circle Venn diagram: Economics &amp; Finance, Natural Environment, Social Context overlap to form the decision-frameworks space.">
+          <g style="isolation: isolate;">
+            <circle cx="110" cy="90"  r="60" fill="#E6F1FB" stroke="#B5D4F4" stroke-width="1.5" style="mix-blend-mode: multiply;"/>
+            <circle cx="190" cy="90"  r="60" fill="#EAF3DE" stroke="#C0DD97" stroke-width="1.5" style="mix-blend-mode: multiply;"/>
+            <circle cx="150" cy="159" r="60" fill="#FAEEDA" stroke="#FAC775" stroke-width="1.5" style="mix-blend-mode: multiply;"/>
+          </g>
+          <!-- Economics & Finance — upper-left lune of the blue circle -->
+          <text x="75"  y="68"  font-size="11" font-weight="600" fill="#185FA5" text-anchor="middle">Economics &amp;</text>
+          <text x="75"  y="80"  font-size="11" font-weight="600" fill="#185FA5" text-anchor="middle">Finance</text>
+          <!-- Natural Environment — upper-right lune of the green circle -->
+          <text x="225" y="68"  font-size="11" font-weight="600" fill="#3B6D11" text-anchor="middle">Natural</text>
+          <text x="225" y="80"  font-size="11" font-weight="600" fill="#3B6D11" text-anchor="middle">Environment</text>
+          <!-- Social Context — lower lune of the amber circle -->
+          <text x="150" y="195" font-size="11" font-weight="600" fill="#854F0B" text-anchor="middle">Social</text>
+          <text x="150" y="207" font-size="11" font-weight="600" fill="#854F0B" text-anchor="middle">Context</text>
+        </svg>
+      </div>
+
+      <div class="cm-zone built">
+        <h3>The Built Environment</h3>
+        <p class="cm-sub"><strong>What the BE does</strong></p>
+        <ul>
+          <li>Sustain life</li>
+          <li>Promote Flourishing</li>
+        </ul>
+        <p class="cm-sub"><strong>What the BE is</strong></p>
+        <ul>
+          <li>Infrastructure Systems</li>
+          <li>Buildings &amp; Structures</li>
+          <li>Managed Natural Systems</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cm-capstone">
+      <strong>Faithful Stewardship (Becoming)</strong> &mdash; the exercise of moral and ethical leadership in making
+      <em>decisions</em> regarding resource <em>inputs</em> for those <em>impacts</em> that help all of God&rsquo;s creations
+      fill their measure and purpose.
+    </div>
+
+    <p class="theme-flow-caption">Each chapter in the schedule below is color-coded to its zone on this map.</p>
+  </section>
+
+  <div class="schedule-wrap">
+    <table class="schedule" id="schedule">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="col-date">Date</th>
+          <th class="col-topic">Topic</th>
+          <th>Preclass</th>
+          <th>In Class</th>
+          <th>Homework</th>
+          <th class="col-time">Est. Time</th>
+          <th class="col-bench">Project Benchmarks</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        <tr class="state-row"><td colspan="8">Loading schedule…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  Course planning data is read live from a Google Sheet. Built for the BYU Department of Civil &amp; Construction Engineering.
+</footer>
+
+<script>
+  // ----- Data source -----
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnezTjnKcCB62KMHyfMhb3VabbVi20t6LbiqMRnlQjJwTINdU6_DHlAW9PKbiRj3E2Df2ZP3qoX-OP/pub?gid=0&single=true&output=csv";
+
+  // ----- Tiny CSV parser (handles quoted fields, commas inside quotes, "" escapes) -----
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = "", inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else { inQuotes = false; }
+        } else { field += c; }
+      } else {
+        if (c === '"') { inQuotes = true; }
+        else if (c === ',') { row.push(field); field = ""; }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
+        else if (c === '\r') { /* swallow */ }
+        else { field += c; }
+      }
+    }
+    if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function escapeHTML(s) {
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  // Render markdown-style links [label](url) and bare URLs as real <a> tags.
+  // Everything else is HTML-escaped. Safe by construction:
+  // we escape first, then transform only known patterns.
+  function richText(val) {
+    let s = escapeHTML((val ?? "").trim());
+    if (!s) return "";
+
+    // Markdown link: [label](http://...)
+    // The brackets/parens have been escaped to &#... by escapeHTML? No — only & < > " are escaped.
+    // So [, ], (, ) survive. URL chars are unescaped.
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      (_, label, url) => `<a href="${url}" target="_blank" rel="noopener">${label}</a>`);
+
+    // Bare URLs (not already inside an href attribute)
+    s = s.replace(/(^|[\s(])((?:https?:\/\/)[^\s<)]+)/g,
+      (_, lead, url) => `${lead}<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
+
+    // Newlines inside cells -> visible breaks
+    s = s.replace(/\n/g, "<br>");
+    return s;
+  }
+
+  function cell(val, opts = {}) {
+    const v = (val ?? "").trim();
+    if (!v) return `<span class="empty" aria-label="empty">—</span>`;
+    const rendered = richText(v);
+    if (opts.hwPill)    return `<span class="hw-pill">Assigned</span>${rendered}`;
+    if (opts.benchPill) return `<span class="bench-pill">Milestone</span>${rendered}`;
+    return rendered;
+  }
+  function rowIsBlank(r) {
+    return r.every(c => !c || !String(c).trim());
+  }
+
+  function render(csvText) {
+    const tbody = document.getElementById("rows");
+    const rows = parseCSV(csvText);
+
+    if (rows.length < 2) {
+      tbody.innerHTML = `<tr class="state-row"><td colspan="8">No schedule data yet.</td></tr>`;
+      return;
+    }
+
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const idx = {
+      date:          header.findIndex(h => h.startsWith("date")),
+      number:        header.findIndex(h => h.startsWith("number") || h === "#"),
+      unit:          header.findIndex(h => h.startsWith("unit")),
+      chapter:       header.findIndex(h => h.startsWith("chapter")),
+      topic:         header.findIndex(h => h.startsWith("topic")),
+      // New schema splits preclass into three columns; legacy single column still supported.
+      preclassText:  header.findIndex(h => h.includes("preclass") && h.includes("text")),
+      preclassOther: header.findIndex(h => h.includes("preclass") && (h.includes("other") || h.includes("activity"))),
+      preclass:      header.findIndex(h => h === "preclass" || (h.includes("preclass") && !h.includes("-"))),
+      url:           header.findIndex(h => h === "url" || h === "link"),
+      inclass:       header.findIndex(h => h.includes("in class") || h.includes("in-class") || h.includes("inclass")),
+      hw:            header.findIndex(h => h.startsWith("hw") || h.includes("homework")),
+      bench:         header.findIndex(h => h.includes("benchmark") || h.includes("milestone") || h.includes("project")),
+      time:          header.findIndex(h => h.includes("time") || h.includes("hour") || h.includes("est")),
+      theme:         header.findIndex(h => h.startsWith("theme")),
+      color:         header.findIndex(h => h.startsWith("color") || h.startsWith("colour")),
+    };
+    // Date column conventionally lives in column 0; tolerate an empty header there.
+    if (idx.date < 0) idx.date = 0;
+
+    // Lightweight color sanitizer — accepts hex (#rgb/#rrggbb), rgb()/rgba(),
+    // and a small allowlist of CSS named colors. Anything else returns ''.
+    const NAMED_COLORS = new Set([
+      "aliceblue","amber","aqua","aquamarine","beige","black","blue","brown",
+      "coral","crimson","cyan","forestgreen","gold","goldenrod","gray","green",
+      "indigo","khaki","lavender","lightblue","lime","magenta","maroon","navy",
+      "olive","orange","orangered","orchid","pink","plum","purple","red",
+      "royalblue","salmon","seagreen","sienna","silver","skyblue","slategray",
+      "steelblue","tan","teal","tomato","turquoise","violet","white","yellow"
+    ]);
+    function sanitizeColor(c) {
+      const v = (c ?? "").trim().toLowerCase();
+      if (!v) return "";
+      if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/.test(v)) return v;
+      if (/^rgba?\(\s*[\d.,\s%]+\)$/.test(v)) return v;
+      if (NAMED_COLORS.has(v)) return v;
+      return "";
+    }
+
+    // Chapter-color palette, aligned to the "Stewardship and the Built
+    // Environment" concept diagram. Each chapter's date band picks up the
+    // color of its corresponding zone on the diagram, so the calendar
+    // and the conceptual map speak the same visual language.
+    const CHAPTER_COLORS = {
+      "1": "#FAECE7",  // coral   — Stewardship (left box on diagram)
+      "2": "#E6F1FB",  // blue    — Economics & Finance sub-framework
+      "3": "#EAF3DE",  // green   — Natural Environment sub-framework
+      "4": "#FAEEDA",  // amber   — Social Context sub-framework
+      "5": "#EDEDF0",  // gray    — Decision Frameworks (central box, revisit)
+    };
+    function chapterColor(ch) {
+      ch = (ch ?? "").trim();
+      if (!ch) return "";
+      if (/appendix/i.test(ch)) return "#F1EFE8";   // warm gray for appendix / case studies
+      return CHAPTER_COLORS[ch] || "";
+    }
+
+    // Build rendered rows: skip empty future placeholders (date-only),
+    // emit a Unit grouping header when the unit changes, render HOLIDAY rows
+    // as slim dividers (no session number).
+    const rawRows = rows.slice(1).filter(r => !rowIsBlank(r));
+    const get = (r, i) => (i >= 0 ? (r[i] ?? "") : "");
+
+    const html = [];
+    let lastUnit = null;
+    for (const r of rawRows) {
+      const unit = get(r, idx.unit).trim();
+      const date = get(r, idx.date).trim();
+      const num  = get(r, idx.number).trim();
+      const topic = get(r, idx.topic).trim();
+      const pre  = get(r, idx.preclass).trim();
+      const inc  = get(r, idx.inclass).trim();
+      const hw   = get(r, idx.hw).trim();
+
+      // Has any meaningful content beyond just a date?
+      const hasContent = !!(unit || num || topic || pre || inc || hw);
+      if (!hasContent) continue;
+
+      // HOLIDAY rows render as a slim divider, no session number.
+      // Keep lastUnit unchanged so we don't redundantly re-emit the same
+      // unit header after the holiday — a holiday doesn't break the unit.
+      if (unit.toUpperCase() === "HOLIDAY") {
+        html.push(`<tr class="holiday-row"><td colspan="8">
+          <span class="holiday-label">Holiday</span>
+          <span class="holiday-date">${escapeHTML(date)}</span>
+        </td></tr>`);
+        continue;
+      }
+
+      // Unit grouping header.
+      // Suppressed for "Case Study" and "Ethics" sessions — these are
+      // threads that interrupt a host unit (e.g., Ethics sessions inside
+      // the Introduction or Decision Frameworks runs). They render as
+      // regular rows under the surrounding unit context.
+      const suppressedUnits = new Set(["case study", "ethics"]);
+      const isSuppressed = suppressedUnits.has(unit.toLowerCase());
+      if (unit && !isSuppressed && unit !== lastUnit) {
+        html.push(`<tr class="unit-header"><td colspan="8">${escapeHTML(unit)}</td></tr>`);
+        lastUnit = unit;
+      }
+
+      const chapter = (idx.chapter >= 0 ? (r[idx.chapter] ?? "") : "").trim();
+      const pText   = (idx.preclassText  >= 0 ? (r[idx.preclassText]  ?? "") : "").trim();
+      const pOther  = (idx.preclassOther >= 0 ? (r[idx.preclassOther] ?? "") : "").trim();
+      const pLegacy = (idx.preclass      >= 0 ? (r[idx.preclass]      ?? "") : "").trim();
+      const url     = (idx.url           >= 0 ? (r[idx.url]            ?? "") : "").trim();
+      const bench   = (idx.bench         >= 0 ? (r[idx.bench]          ?? "") : "").trim();
+      const time    = (idx.time          >= 0 ? (r[idx.time]           ?? "") : "").trim();
+      const theme   = (idx.theme         >= 0 ? (r[idx.theme]          ?? "") : "").trim();
+      const color   = sanitizeColor(idx.color >= 0 ? (r[idx.color]     ?? "") : "");
+      const hasHW = !!hw;
+      const hasBench = !!bench;
+      const hasAssigned = hasHW || hasBench;
+
+      // Case Study and Ethics sessions adopt the Stewardship (Ch 1) coral
+      // band regardless of which chapter they sit in. This makes the
+      // through-line of stewardship-flavored sessions visually continuous,
+      // even when they recur inside other chapters or the appendix.
+      let chapColor = chapterColor(chapter);
+      if (isSuppressed) chapColor = "#FAECE7";
+      const styleVars = [];
+      if (color)     styleVars.push(`--theme-color: ${color}`);
+      if (chapColor) styleVars.push(`--chapter-color: ${chapColor}`);
+      const styleAttr = styleVars.length ? ` style="${styleVars.join("; ")};"` : "";
+
+      // Topic cell carries the topic name plus (optionally) a Theme chip.
+      // Chapter is conveyed by the Date column's color band, so no chapter
+      // chip is rendered here — that data drives color, nothing else.
+      const chipsHTML = theme ? `<span class="theme-chip">${escapeHTML(theme)}</span>` : "";
+      const topicHTML = `${cell(topic)}${chipsHTML ? `<div class="chip-row">${chipsHTML}</div>` : ""}`;
+
+      // Preclass cell:
+      //   Prefer the new schema: pOther = description, pText = textbook section ref, url = link
+      //   Fall back to the legacy single "Preclass" column for older sheets.
+      let preclassHTML;
+      if (pText || pOther || url) {
+        const labelText = pOther || (url ? url : "");
+        const labelHTML = url && labelText
+          ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(labelText)}</a>`
+          : escapeHTML(labelText);
+        const refHTML = pText ? `<div class="preclass-ref">§${escapeHTML(pText)}</div>` : "";
+        preclassHTML = labelHTML
+          ? `<div>${labelHTML}</div>${refHTML}`
+          : (refHTML || `<span class="empty" aria-label="empty">—</span>`);
+      } else {
+        preclassHTML = cell(pLegacy);
+      }
+
+      html.push(`<tr class="session ${hasAssigned ? "has-hw" : ""}"${styleAttr}>
+        <td class="col-num"   data-label="Session">${cell(num)}</td>
+        <td class="col-date"  data-label="Date">${cell(date)}</td>
+        <td class="col-topic" data-label="Topic">${topicHTML}</td>
+        <td data-label="Preclass">${preclassHTML}</td>
+        <td data-label="In class">${cell(inc)}</td>
+        <td data-label="Homework">${cell(hw, { hwPill: hasHW })}</td>
+        <td class="col-time" data-label="Est. time">${cell(time)}</td>
+        <td class="col-bench" data-label="Project benchmark">${cell(bench, { benchPill: hasBench })}</td>
+      </tr>`);
+    }
+
+    if (!html.length) {
+      tbody.innerHTML = `<tr class="state-row"><td colspan="8">Schedule rows haven't been added yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = html.join("");
+  }
+
+  function showError(msg) {
+    document.getElementById("rows").innerHTML =
+      `<tr class="state-row error"><td colspan="8">Couldn't load schedule: ${escapeHTML(msg)}</td></tr>`;
+  }
+
+  fetch(CSV_URL + "&t=" + Date.now(), { cache: "no-store" })
+    .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+    .then(render)
+    .catch(err => showError(err.message || String(err)));
+</script>
+
+</body>
+</html>
