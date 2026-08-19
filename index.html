@@ -193,6 +193,11 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.94rem;
+      /* Fixed layout so column widths reflect the material, not the
+         browser's guess: Preclass carries the most text and gets the
+         widest track; Topic and In Class are mid-weight; HW and
+         Benchmarks are label-length columns. */
+      table-layout: fixed;
     }
     table.schedule thead th {
       background: var(--byu-navy);
@@ -211,6 +216,7 @@
       padding: 12px 14px;
       border-top: 1px solid var(--line);
       vertical-align: top;
+      overflow-wrap: break-word;   /* long titles/URLs wrap inside fixed tracks */
     }
     table.schedule tbody tr:nth-child(even) td { background: var(--row-alt); }
 
@@ -218,11 +224,17 @@
        Color is applied only to td so it doesn't clobber the white
        <thead> color on the navy header band. */
     table.schedule th.col-num,
-    table.schedule td.col-num { width: 56px; text-align: center; font-variant-numeric: tabular-nums; }
+    table.schedule td.col-num { width: 48px; padding-left: 6px; padding-right: 6px; text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
     table.schedule td.col-num { color: var(--muted); }
     table.schedule th.col-date,
-    table.schedule td.col-date { width: 130px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    table.schedule td.col-date { width: 108px; white-space: nowrap; font-variant-numeric: tabular-nums; }
     table.schedule td.col-date { color: var(--byu-slate); }
+    /* Content columns — proportional tracks sized to their material.
+       Percentages + the four fixed tracks sum to ~100% of the table. */
+    table.schedule th.col-topic   { width: 15%; }
+    table.schedule th.col-pre     { width: 27%; }
+    table.schedule th.col-inclass { width: 14%; }
+    table.schedule th.col-hw      { width: 11%; }
 
     /* Chapter color band — applied as the Date cell background so each
        textbook chapter has a visually distinct vertical strip down the
@@ -261,13 +273,19 @@
     .bench-pill.milestone { background: rgba(56, 135, 12, 0.12); color: #2a6a08; }
     .bench-pill.due       { background: rgba(186, 117, 23, 0.14); color: #854F0B; }
 
-    /* Estimated time column — narrow, right-aligned, tabular numerics */
+    /* Estimated time column — narrow, tabular numerics. Wrapping allowed:
+       a few estimates carry parenthetical notes that need a second line. */
     table.schedule th.col-time,
-    table.schedule td.col-time { width: 90px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-    table.schedule td.col-time { color: var(--byu-slate); }
+    table.schedule td.col-time { width: 96px; padding-left: 10px; padding-right: 10px; font-variant-numeric: tabular-nums; }
+    table.schedule td.col-time { color: var(--byu-slate); font-size: 0.88rem; }
     /* Project Benchmarks column — slightly wider than HW since milestones often have longer titles */
     table.schedule th.col-bench,
-    table.schedule td.col-bench { width: 160px; }
+    table.schedule td.col-bench { width: 14%; }
+    /* Secondary benchmark lines (e.g. quiz windows) under the pill line */
+    .bench-more { margin-top: 6px; }
+    /* Preclass items — one block per reading/video/podcast, separated by
+       a full blank line so multiple prep items never run together. */
+    .pre-item + .pre-item { margin-top: 1.35em; }
 
     /* Inline links inside table cells inherit BYU royal */
     table.schedule td a { color: var(--byu-royal); text-decoration: underline; text-underline-offset: 2px; }
@@ -322,17 +340,6 @@
       font-size: 0.78rem;
       color: var(--muted);
       font-variant-numeric: tabular-nums;
-    }
-    /* Continuation lines of a preclass block whose first line carries the
-       link. Previously the whole block was swallowed into one <a>. */
-    .preclass-rest {
-      margin-top: 3px;
-    }
-    /* A holiday row that still carries coursework renders as a normal row so
-       the work stays visible, with an italic muted date to mark it. */
-    tr.session.holiday-session .col-date {
-      font-style: italic;
-      color: var(--muted);
     }
     table.schedule .preclass-ref a {
       color: var(--byu-royal);
@@ -531,7 +538,9 @@
         font-weight: 600;
         vertical-align: top;
       }
-      table.schedule td.col-num { text-align: left; width: auto; color: var(--byu-navy); font-weight: 700; }
+      table.schedule td.col-num { text-align: left; color: var(--byu-navy); font-weight: 700; }
+      /* Cards ignore the desktop column tracks entirely */
+      table.schedule th, table.schedule td { width: auto !important; white-space: normal !important; }
       /* On mobile each row is a card; the theme stripe lives on the
          card edge instead of the first cell. Transparent fallback
          keeps the card clean when no theme color is set. */
@@ -687,9 +696,9 @@
           <th class="col-num">#</th>
           <th class="col-date">Date</th>
           <th class="col-topic">Topic</th>
-          <th>Preclass</th>
-          <th>In Class</th>
-          <th>Assigned Homework</th>
+          <th class="col-pre">Preclass</th>
+          <th class="col-inclass">In Class</th>
+          <th class="col-hw">HW Due</th>
           <th class="col-time">Est. Time</th>
           <th class="col-bench">Project Benchmarks</th>
         </tr>
@@ -757,16 +766,6 @@
     s = s.replace(/(^|[\s(])((?:https?:\/\/)[^\s<)]+)/g,
       (_, lead, url) => `${lead}<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
 
-    // **bold** and *italic*
-    s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
-    s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
-
-    // Leading markdown heading marks (##, ###) are not headings in a table
-    // cell -- render the text emphasised rather than printing the hashes.
-    s = s.split("\n")
-         .map(ln => ln.replace(/^\s*#{1,6}\s+(.*)$/, "<strong>$1</strong>"))
-         .join("\n");
-
     // Newlines inside cells -> visible breaks
     s = s.replace(/\n/g, "<br>");
     return s;
@@ -784,17 +783,77 @@
   // Due pill. Anything else falls back to a neutral Milestone pill so old
   // data still renders sensibly.
   function benchPillHTML(text) {
-    const m = text.match(/^(begin|due)\b\s*[:\-—]*\s*(.*)$/i);
+    // The pill is derived from the FIRST line only; later lines (quiz
+    // windows, follow-on notes) render as plain sub-lines beneath it.
+    const lines = text.split("\n").map(s => s.trim()).filter(Boolean);
+    const first = lines[0] ?? "";
+    const restLines = lines.slice(1)
+      .map(l => `<div class="bench-more">${richText(l)}</div>`).join("");
+    const m = first.match(/^(begin|due)\b\s*[:\-—]*\s*(.*)$/i);
+    let head;
     if (m) {
       const type = m[1].toLowerCase();                      // "begin" | "due"
       const label = type.charAt(0).toUpperCase() + type.slice(1);
       const rest = m[2].trim();
-      return `<span class="bench-pill ${type}">${label}</span>${rest ? richText(rest) : ""}`;
+      head = `<span class="bench-pill ${type}">${label}</span>${rest ? richText(rest) : ""}`;
+    } else {
+      head = `<span class="bench-pill milestone">Milestone</span>${richText(first)}`;
     }
-    return `<span class="bench-pill milestone">Milestone</span>${richText(text)}`;
+    return head + restLines;
   }
   function rowIsBlank(r) {
     return r.every(c => !c || !String(c).trim());
+  }
+
+  // ------------------------------------------------------------------
+  // Preclass rendering — one block per line of the "Preclass - Other"
+  // cell, so multiple readings/videos/podcasts get a blank line between
+  // them instead of running together. Each line supports markdown links
+  // ([label](url)) and bare URLs via richText.
+  //
+  // Legacy single-URL support: when the row's URL column is filled and
+  // no line carries its own link, the URL is attached to the line that
+  // best matches it (token overlap with the URL's host/path, diacritics
+  // normalized), falling back to the first "Watch:"/"Listen:" line for
+  // video/audio URLs, then to the first line.
+  // ------------------------------------------------------------------
+  function bestLinkTarget(items, url) {
+    const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    let u = null;
+    try { u = new URL(url); } catch (e) { return 0; }
+    const tokens = (u.hostname.replace(/^www\./, "").split(".")[0] + "/" + decodeURIComponent(u.pathname))
+      .split(/[^a-z0-9]+/i).map(norm).filter(w => w.length >= 4);
+    const wordSets = items.map(t => new Set(norm(t).split(/[^a-z0-9]+/).filter(w => w.length >= 4)));
+    let best = -1, bestScore = 0;
+    items.forEach((t, i) => {
+      let score = 0;
+      for (const tok of tokens) {
+        if (wordSets[i].has(tok)) { score += 2; continue; }
+        for (const w of wordSets[i]) {
+          if (tok.includes(w) || w.includes(tok)) { score += 1; break; }
+        }
+      }
+      if (score > bestScore) { best = i; bestScore = score; }
+    });
+    if (best >= 0) return best;
+    if (/youtu|vimeo|bing\.com\/videos|podcast/i.test(url)) {
+      const w = items.findIndex(t => /^(watch|listen)\b/i.test(t));
+      if (w >= 0) return w;
+    }
+    return 0;
+  }
+
+  function preclassItemsHTML(pOther, url) {
+    const items = (pOther ?? "").split("\n").map(s => s.trim()).filter(Boolean);
+    if (!items.length) return "";
+    const anyLinked = items.some(t => /https?:\/\//.test(t));
+    const linkIdx = (url && !anyLinked) ? bestLinkTarget(items, url) : -1;
+    return items.map((t, i) => {
+      const inner = (i === linkIdx)
+        ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(t)}</a>`
+        : richText(t);
+      return `<div class="pre-item">${inner}</div>`;
+    }).join("");
   }
 
   function render(csvText) {
@@ -961,29 +1020,14 @@
       const inc  = get(r, idx.inclass).trim();
       const hw   = get(r, idx.hw).trim();
 
-      // Project benchmarks and the split preclass columns count as content
-      // too. Reading them here (rather than after the early-continue) means
-      // a row carrying only a benchmark is no longer dropped silently.
-      const benchPeek  = (idx.bench         >= 0 ? (r[idx.bench]         ?? "") : "").trim();
-      const pTextPeek  = (idx.preclassText  >= 0 ? (r[idx.preclassText]  ?? "") : "").trim();
-      const pOtherPeek = (idx.preclassOther >= 0 ? (r[idx.preclassOther] ?? "") : "").trim();
-
       // Has any meaningful content beyond just a date?
-      const hasContent = !!(unit || num || topic || pre || inc || hw ||
-                            benchPeek || pTextPeek || pOtherPeek);
+      const hasContent = !!(unit || num || topic || pre || inc || hw);
       if (!hasContent) continue;
 
-      // HOLIDAY rows normally render as a slim divider with no session
-      // number. But a holiday row that also carries an assignment, benchmark
-      // or reading must NOT be collapsed -- that silently deletes coursework.
-      // Such rows fall through and render as a normal row, flagged as a
-      // holiday, so nothing is lost.
-      const isHoliday = unit.toUpperCase() === "HOLIDAY";
-      const holidayCarriesWork = !!(num || topic || pre || inc || hw ||
-                                    benchPeek || pTextPeek || pOtherPeek);
+      // HOLIDAY rows render as a slim divider, no session number.
       // Keep lastUnit unchanged so we don't redundantly re-emit the same
       // unit header after the holiday — a holiday doesn't break the unit.
-      if (isHoliday && !holidayCarriesWork) {
+      if (unit.toUpperCase() === "HOLIDAY") {
         html.push(`<tr class="holiday-row"><td colspan="8">
           <span class="holiday-label">Holiday</span>
           <span class="holiday-date">${escapeHTML(date)}</span>
@@ -997,7 +1041,7 @@
       // the Introduction or Decision Frameworks runs). They render as
       // regular rows under the surrounding unit context.
       const suppressedUnits = new Set(["case study", "ethics"]);
-      const isSuppressed = suppressedUnits.has(unit.toLowerCase()) || isHoliday;
+      const isSuppressed = suppressedUnits.has(unit.toLowerCase());
       if (unit && !isSuppressed && unit !== lastUnit) {
         html.push(`<tr class="unit-header"><td colspan="8">${escapeHTML(unit)}</td></tr>`);
         lastUnit = unit;
@@ -1040,20 +1084,9 @@
       //   "Preclass" column for older sheets.
       let preclassHTML;
       if (pText || pOther || url) {
-        // Only the FIRST line becomes the hyperlink. Previously the whole
-        // cell was wrapped in one <a>, so a multi-line preclass block
-        // rendered as a single unreadable link.
-        const labelText = pOther || (url ? url : "");
-        let labelHTML;
-        if (url && labelText) {
-          const lines = labelText.split("\n");
-          const head = lines.shift();
-          const rest = lines.join("\n");
-          labelHTML =
-            `<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(head)}</a>` +
-            (rest ? `<div class="preclass-rest">${richText(rest)}</div>` : "");
-        } else {
-          labelHTML = richText(labelText);
+        let itemsHTML = preclassItemsHTML(pOther, url);
+        if (!itemsHTML && url) {
+          itemsHTML = `<div class="pre-item"><a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a></div>`;
         }
         let refHTML = "";
         if (pText) {
@@ -1063,20 +1096,20 @@
             ? `<div class="preclass-ref"><a href="${refLink}" target="_blank" rel="noopener">${refInner}</a></div>`
             : `<div class="preclass-ref">${refInner}</div>`;
         }
-        preclassHTML = labelHTML
-          ? `<div>${labelHTML}</div>${refHTML}`
+        preclassHTML = itemsHTML
+          ? `${itemsHTML}${refHTML}`
           : (refHTML || `<span class="empty" aria-label="empty">—</span>`);
       } else {
         preclassHTML = cell(pLegacy);
       }
 
-      html.push(`<tr class="session ${hasAssigned ? "has-hw" : ""}${isHoliday ? " holiday-session" : ""}"${styleAttr}>
+      html.push(`<tr class="session ${hasAssigned ? "has-hw" : ""}"${styleAttr}>
         <td class="col-num"   data-label="Session">${cell(num)}</td>
         <td class="col-date"  data-label="Date">${cell(date)}</td>
         <td class="col-topic" data-label="Topic">${topicHTML}</td>
         <td data-label="Preclass">${preclassHTML}</td>
         <td data-label="In class">${cell(inc)}</td>
-        <td data-label="Assigned Homework">${cell(hw)}</td>
+        <td data-label="HW Due">${cell(hw)}</td>
         <td class="col-time" data-label="Est. time">${cell(time)}</td>
         <td class="col-bench" data-label="Project benchmark">${cell(bench, { benchPill: hasBench })}</td>
       </tr>`);
