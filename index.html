@@ -231,10 +231,11 @@
     table.schedule td.col-date { color: var(--byu-slate); }
     /* Content columns — proportional tracks sized to their material.
        Percentages + the four fixed tracks sum to ~100% of the table. */
-    table.schedule th.col-topic   { width: 15%; }
-    table.schedule th.col-pre     { width: 27%; }
-    table.schedule th.col-inclass { width: 14%; }
+    table.schedule th.col-topic   { width: 13%; }
+    table.schedule th.col-pre     { width: 23%; }
+    table.schedule th.col-inclass { width: 11%; }
     table.schedule th.col-hw      { width: 11%; }
+    table.schedule th.col-quiz    { width: 11%; }
 
     /* Chapter color band — applied as the Date cell background so each
        textbook chapter has a visually distinct vertical strip down the
@@ -253,6 +254,7 @@
       box-shadow: inset 4px 0 0 var(--byu-slate-soft);
     }
     .hw-pill,
+    .quiz-pill,
     .bench-pill {
       display: inline-block;
       padding: 2px 9px;
@@ -265,6 +267,9 @@
       vertical-align: 1px;
     }
     .hw-pill { background: rgba(0, 71, 186, 0.10); color: var(--byu-royal); }
+    /* Quizzes & Exams pills — royal blue for quizzes, navy for exams */
+    .quiz-pill.quiz { background: rgba(0, 71, 186, 0.10); color: var(--byu-royal); }
+    .quiz-pill.exam { background: rgba(0, 46, 93, 0.12);  color: var(--byu-navy); }
     /* Project Benchmark pills — color reflects the first word of the cell:
        "Begin" → green (forward / starting),
        "Due"   → amber (deadline / wrap-up).
@@ -281,8 +286,9 @@
     /* Project Benchmarks column — slightly wider than HW since milestones often have longer titles */
     table.schedule th.col-bench,
     table.schedule td.col-bench { width: 14%; }
-    /* Secondary benchmark lines (e.g. quiz windows) under the pill line */
+    /* Secondary benchmark lines under the pill line */
     .bench-more { margin-top: 6px; }
+    .quiz-line + .quiz-line { margin-top: 6px; }
     /* Preclass items — one block per reading/video/podcast, separated by
        a full blank line so multiple prep items never run together. */
     .pre-item + .pre-item { margin-top: 1.35em; }
@@ -699,12 +705,13 @@
           <th class="col-pre">Preclass</th>
           <th class="col-inclass">In Class</th>
           <th class="col-hw">HW Due</th>
+          <th class="col-quiz">Quizzes &amp; Exams</th>
           <th class="col-time">Est. Time</th>
           <th class="col-bench">Project Benchmarks</th>
         </tr>
       </thead>
       <tbody id="rows">
-        <tr class="state-row"><td colspan="8">Loading schedule…</td></tr>
+        <tr class="state-row"><td colspan="9">Loading schedule…</td></tr>
       </tbody>
     </table>
   </div>
@@ -801,6 +808,17 @@
     }
     return head + restLines;
   }
+  // Quizzes & Exams cell — each line gets a QUIZ or EXAM pill (navy for
+  // exams, royal for quizzes) followed by the line text.
+  function quizPillHTML(text) {
+    const lines = text.split("\n").map(s => s.trim()).filter(Boolean);
+    return lines.map(l => {
+      const type = /exam/i.test(l) ? "exam" : "quiz";
+      const label = type === "exam" ? "Exam" : "Quiz";
+      return `<div class="quiz-line"><span class="quiz-pill ${type}">${label}</span>${richText(l)}</div>`;
+    }).join("");
+  }
+
   function rowIsBlank(r) {
     return r.every(c => !c || !String(c).trim());
   }
@@ -861,7 +879,7 @@
     const rows = parseCSV(csvText);
 
     if (rows.length < 2) {
-      tbody.innerHTML = `<tr class="state-row"><td colspan="8">No schedule data yet.</td></tr>`;
+      tbody.innerHTML = `<tr class="state-row"><td colspan="9">No schedule data yet.</td></tr>`;
       return;
     }
 
@@ -879,6 +897,7 @@
       url:           header.findIndex(h => h === "url" || h === "link"),
       inclass:       header.findIndex(h => h.includes("in class") || h.includes("in-class") || h.includes("inclass")),
       hw:            header.findIndex(h => /\bhw\b/.test(h) || h.includes("homework")),
+      quiz:          header.findIndex(h => h.includes("quiz") || h.includes("exam")),
       bench:         header.findIndex(h => h.includes("benchmark") || h.includes("milestone") || h.includes("project")),
       time:          header.findIndex(h => h.includes("time") || h.includes("hour") || h.includes("est")),
       theme:         header.findIndex(h => h.startsWith("theme")),
@@ -1028,7 +1047,7 @@
       // Keep lastUnit unchanged so we don't redundantly re-emit the same
       // unit header after the holiday — a holiday doesn't break the unit.
       if (unit.toUpperCase() === "HOLIDAY") {
-        html.push(`<tr class="holiday-row"><td colspan="8">
+        html.push(`<tr class="holiday-row"><td colspan="9">
           <span class="holiday-label">Holiday</span>
           <span class="holiday-date">${escapeHTML(date)}</span>
         </td></tr>`);
@@ -1043,7 +1062,7 @@
       const suppressedUnits = new Set(["case study", "ethics"]);
       const isSuppressed = suppressedUnits.has(unit.toLowerCase());
       if (unit && !isSuppressed && unit !== lastUnit) {
-        html.push(`<tr class="unit-header"><td colspan="8">${escapeHTML(unit)}</td></tr>`);
+        html.push(`<tr class="unit-header"><td colspan="9">${escapeHTML(unit)}</td></tr>`);
         lastUnit = unit;
       }
 
@@ -1053,6 +1072,7 @@
       const pLegacy = (idx.preclass      >= 0 ? (r[idx.preclass]      ?? "") : "").trim();
       const url     = (idx.url           >= 0 ? (r[idx.url]            ?? "") : "").trim();
       const bench   = (idx.bench         >= 0 ? (r[idx.bench]          ?? "") : "").trim();
+      const quiz    = (idx.quiz          >= 0 ? (r[idx.quiz]           ?? "") : "").trim();
       const time    = (idx.time          >= 0 ? (r[idx.time]           ?? "") : "").trim();
       const theme   = (idx.theme         >= 0 ? (r[idx.theme]          ?? "") : "").trim();
       const color   = sanitizeColor(idx.color >= 0 ? (r[idx.color]     ?? "") : "");
@@ -1110,13 +1130,14 @@
         <td data-label="Preclass">${preclassHTML}</td>
         <td data-label="In class">${cell(inc)}</td>
         <td data-label="HW Due">${cell(hw)}</td>
+        <td class="col-quiz" data-label="Quizzes &amp; Exams">${quiz ? quizPillHTML(quiz) : `<span class="empty" aria-label="empty">—</span>`}</td>
         <td class="col-time" data-label="Est. time">${cell(time)}</td>
         <td class="col-bench" data-label="Project benchmark">${cell(bench, { benchPill: hasBench })}</td>
       </tr>`);
     }
 
     if (!html.length) {
-      tbody.innerHTML = `<tr class="state-row"><td colspan="8">Schedule rows haven't been added yet.</td></tr>`;
+      tbody.innerHTML = `<tr class="state-row"><td colspan="9">Schedule rows haven't been added yet.</td></tr>`;
       return;
     }
     tbody.innerHTML = html.join("");
@@ -1124,7 +1145,7 @@
 
   function showError(msg) {
     document.getElementById("rows").innerHTML =
-      `<tr class="state-row error"><td colspan="8">Couldn't load schedule: ${escapeHTML(msg)}</td></tr>`;
+      `<tr class="state-row error"><td colspan="9">Couldn't load schedule: ${escapeHTML(msg)}</td></tr>`;
   }
 
   fetch(CSV_URL + "&t=" + Date.now(), { cache: "no-store" })
