@@ -1057,7 +1057,10 @@
       "5.11": "case_studies.html#keystone-xl-pipeline-transportation",
     };
     function sectionLink(sec) {
-      const path = SECTION_MAP[(sec ?? "").trim()];
+      // The cell may carry just a ref ("1.2") or ref + section name
+      // ("1.2 Built Environments") — the leading ref drives the deep link.
+      const key = (((sec ?? "").trim()).match(/^\d+(?:\.\d+)*/) || [""])[0];
+      const path = SECTION_MAP[key];
       return path ? TEXTBOOK_BASE + path : "";
     }
 
@@ -1187,13 +1190,16 @@
         if (!itemsHTML && url) {
           itemsHTML = `<div class="pre-item"><a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a></div>`;
         }
+        // Textbook selection — rendered as a full "Read: <section>" item,
+        // hyperlinked to the online textbook, styled like the other prep
+        // items (blank line between).
         let refHTML = "";
         if (pText) {
           const refLink = sectionLink(pText);
-          const refInner = `§${escapeHTML(pText)}`;
+          const refInner = escapeHTML(pText);
           refHTML = refLink
-            ? `<div class="preclass-ref"><a href="${refLink}" target="_blank" rel="noopener">${refInner}</a></div>`
-            : `<div class="preclass-ref">${refInner}</div>`;
+            ? `<div class="pre-item">Read: <a href="${refLink}" target="_blank" rel="noopener">${refInner}</a></div>`
+            : `<div class="pre-item">Read: ${refInner}</div>`;
         }
         preclassHTML = itemsHTML
           ? `${itemsHTML}${refHTML}`
