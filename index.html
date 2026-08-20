@@ -270,17 +270,17 @@
     /* Quizzes & Exams pills — "Quiz opens" green (window starting, like
        Begin), "Quiz closes" amber (deadline, like Due), navy for exams,
        royal blue for a quiz line with no open/close state. */
-    .quiz-pill.opens  { background: rgba(56, 135, 12, 0.12); color: #2a6a08; }
-    .quiz-pill.closes { background: rgba(186, 117, 23, 0.14); color: #854F0B; }
+    .quiz-pill.opens  { background: rgba(45, 164, 78, 0.16); color: #1a7f37; }
+    .quiz-pill.closes { background: rgba(207, 34, 46, 0.12); color: #b42318; }
     .quiz-pill.quiz   { background: rgba(0, 71, 186, 0.10); color: var(--byu-royal); }
     .quiz-pill.exam   { background: rgba(0, 46, 93, 0.12);  color: var(--byu-navy); }
     /* Project Benchmark pills — color reflects the first word of the cell:
        "Begin" → green (forward / starting),
        "Due"   → amber (deadline / wrap-up).
        Plain milestone (no Begin/Due prefix) falls back to the green hue. */
-    .bench-pill.begin,
-    .bench-pill.milestone { background: rgba(56, 135, 12, 0.12); color: #2a6a08; }
-    .bench-pill.due       { background: rgba(186, 117, 23, 0.14); color: #854F0B; }
+    .bench-pill.begin     { background: rgba(45, 164, 78, 0.16); color: #1a7f37; }
+    .bench-pill.milestone { background: var(--byu-grey); color: var(--byu-slate-soft); }
+    .bench-pill.due       { background: rgba(207, 34, 46, 0.12); color: #b42318; }
 
     /* Estimated time column — narrow, tabular numerics. Wrapping allowed:
        a few estimates carry parenthetical notes that need a second line. */
@@ -469,29 +469,53 @@
       border-bottom: 1px solid var(--line);
     }
 
-    /* Holiday rows — slim, muted dividers with no session number */
+    /* Week marker rows — slim signposts between calendar weeks. The
+       heavier top border does the visual bracketing; the label is small
+       caps so it reads as structure, not content. */
+    tr.week-row td {
+      background: var(--byu-white) !important;
+      color: var(--byu-slate-soft);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 12px 14px 4px;
+      border-top: 3px solid #c3c9d2;
+    }
+
+    /* Holiday rows — grayed, with the date aligned in its normal column
+       and a "HOLIDAY · <name>" note running across the rest of the row. */
     tr.holiday-row td {
       background: #fafafa !important;
-      color: var(--muted);
+      color: #9aa0a6;
       font-size: 0.85rem;
       padding: 8px 14px;
       text-align: left;
       border-top: 1px solid var(--line);
     }
-    .holiday-label {
-      display: inline-block;
-      background: var(--byu-grey);
-      color: var(--byu-slate);
-      padding: 2px 9px;
-      border-radius: 999px;
+    .holiday-note {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
       font-size: 0.72rem;
       font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-right: 10px;
     }
-    .holiday-date {
-      font-variant-numeric: tabular-nums;
+
+    /* Case-study rows — soft tint across the row plus an explicit chip
+       above the topic so the thread is unmistakable at a glance. */
+    table.schedule tbody tr.case-row td { background: #FBF3EE !important; }
+    .case-chip {
+      display: block;
+      width: max-content;
+      margin-bottom: 5px;
+      padding: 1px 9px;
+      border: 1px solid #D9906F;
+      border-radius: 999px;
+      background: #fff;
+      color: #A84B24;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
     /* ============================================================
@@ -1042,8 +1066,20 @@
     const rawRows = rows.slice(1).filter(r => !rowIsBlank(r));
     const get = (r, i) => (i >= 0 ? (r[i] ?? "") : "");
 
+    // Week segmentation: parse "2 Sep - Wed" / "12-17 Dec" style dates
+    // (Fall 2026) and emit a slim week marker whenever the calendar week
+    // (Sun-Sat) advances.
+    const MONTH_IDX = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+    function parseRowDate(str) {
+      const m = str.match(/^(\d+)(?:\s*-\s*\d+)?\s+([A-Za-z]{3})/);
+      if (!m) return null;
+      const mon = MONTH_IDX[m[2].toLowerCase()];
+      return mon == null ? null : new Date(2026, mon, parseInt(m[1], 10));
+    }
+
     const html = [];
     let lastUnit = null;
+    let week0Sunday = null, lastWeekIdx = -1;
     for (const r of rawRows) {
       const unit = get(r, idx.unit).trim();
       const date = get(r, idx.date).trim();
@@ -1057,14 +1093,32 @@
       const hasContent = !!(unit || num || topic || pre || inc || hw);
       if (!hasContent) continue;
 
-      // HOLIDAY rows render as a slim divider, no session number.
+      // Week marker — before any holiday/unit handling so the band sits
+      // above whatever the week opens with.
+      const rowDate = parseRowDate(date);
+      if (rowDate) {
+        if (!week0Sunday) {
+          week0Sunday = new Date(rowDate);
+          week0Sunday.setDate(rowDate.getDate() - rowDate.getDay());
+        }
+        const wk = Math.floor((rowDate - week0Sunday) / 604800000);
+        if (wk !== lastWeekIdx) {
+          html.push(`<tr class="week-row"><td colspan="9">Week ${wk + 1}</td></tr>`);
+          lastWeekIdx = wk;
+        }
+      }
+
+      // HOLIDAY rows: date stays aligned in its own column, grayed, with
+      // a HOLIDAY note (plus the holiday's name from the Topic column)
+      // running across the rest of the band. No session number.
       // Keep lastUnit unchanged so we don't redundantly re-emit the same
       // unit header after the holiday — a holiday doesn't break the unit.
       if (unit.toUpperCase() === "HOLIDAY") {
-        html.push(`<tr class="holiday-row"><td colspan="9">
-          <span class="holiday-label">Holiday</span>
-          <span class="holiday-date">${escapeHTML(date)}</span>
-        </td></tr>`);
+        html.push(`<tr class="holiday-row">
+          <td class="col-num"></td>
+          <td class="col-date">${escapeHTML(date)}</td>
+          <td colspan="7"><span class="holiday-note">Holiday${topic ? " · " + escapeHTML(topic) : ""}</span></td>
+        </tr>`);
         continue;
       }
 
@@ -1109,7 +1163,13 @@
       // Chapter is conveyed by the Date column's color band, so no chapter
       // chip is rendered here — that data drives color, nothing else.
       const chipsHTML = theme ? `<span class="theme-chip">${escapeHTML(theme)}</span>` : "";
-      const topicHTML = `${cell(topic)}${chipsHTML ? `<div class="chip-row">${chipsHTML}</div>` : ""}`;
+      // Case-study sessions get an explicit chip above the topic (and a
+      // row tint via the case-row class); the "Case Study:" prefix is
+      // trimmed from the title since the chip already says it.
+      const isCase = unit.toLowerCase() === "case study";
+      const topicShown = isCase ? topic.replace(/^case study:?\s*/i, "") : topic;
+      const caseChip = isCase ? `<span class="case-chip">Case Study</span>` : "";
+      const topicHTML = `${caseChip}${cell(topicShown)}${chipsHTML ? `<div class="chip-row">${chipsHTML}</div>` : ""}`;
 
       // Preclass cell:
       //   Prefer the new schema: pOther = description, pText = textbook section ref, url = link.
@@ -1137,7 +1197,7 @@
         preclassHTML = cell(pLegacy);
       }
 
-      html.push(`<tr class="session ${hasAssigned ? "has-hw" : ""}"${styleAttr}>
+      html.push(`<tr class="session ${hasAssigned ? "has-hw" : ""}${isCase ? " case-row" : ""}"${styleAttr}>
         <td class="col-num"   data-label="Session">${cell(num)}</td>
         <td class="col-date"  data-label="Date">${cell(date)}</td>
         <td class="col-topic" data-label="Topic">${topicHTML}</td>
