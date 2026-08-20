@@ -1093,8 +1093,10 @@
       const hasContent = !!(unit || num || topic || pre || inc || hw);
       if (!hasContent) continue;
 
-      // Week marker — before any holiday/unit handling so the band sits
-      // above whatever the week opens with.
+      // Week marker — computed here, but emitted AFTER a unit header when
+      // both land on the same row, so the big navy unit band leads and the
+      // slim week ribbon sits beneath it.
+      let weekRowHTML = "";
       const rowDate = parseRowDate(date);
       if (rowDate) {
         if (!week0Sunday) {
@@ -1103,7 +1105,7 @@
         }
         const wk = Math.floor((rowDate - week0Sunday) / 604800000);
         if (wk !== lastWeekIdx) {
-          html.push(`<tr class="week-row"><td colspan="9">Week ${wk + 1}</td></tr>`);
+          weekRowHTML = `<tr class="week-row"><td colspan="9">Week ${wk + 1}</td></tr>`;
           lastWeekIdx = wk;
         }
       }
@@ -1114,6 +1116,7 @@
       // Keep lastUnit unchanged so we don't redundantly re-emit the same
       // unit header after the holiday — a holiday doesn't break the unit.
       if (unit.toUpperCase() === "HOLIDAY") {
+        if (weekRowHTML) html.push(weekRowHTML);
         html.push(`<tr class="holiday-row">
           <td class="col-num"></td>
           <td class="col-date">${escapeHTML(date)}</td>
@@ -1133,6 +1136,7 @@
         html.push(`<tr class="unit-header"><td colspan="9">${escapeHTML(unit)}</td></tr>`);
         lastUnit = unit;
       }
+      if (weekRowHTML) html.push(weekRowHTML);
 
       const chapter = (idx.chapter >= 0 ? (r[idx.chapter] ?? "") : "").trim();
       const pText   = (idx.preclassText  >= 0 ? (r[idx.preclassText]  ?? "") : "").trim();
