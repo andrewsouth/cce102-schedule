@@ -488,10 +488,11 @@
     tr.holiday-row td {
       background: #fafafa !important;
       color: #9aa0a6;
-      font-size: 0.85rem;
-      padding: 8px 14px;
+      font-size: 0.94rem;   /* match session rows so the date lines up visually */
+      padding: 12px 14px;   /* same cell padding as session rows → same min height */
       text-align: left;
       border-top: 1px solid var(--line);
+      vertical-align: middle;
     }
     .holiday-note {
       text-transform: uppercase;
