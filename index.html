@@ -851,7 +851,7 @@
       const m = l.match(/^(.*?)\s*(?:quiz\s+)?(opens|closes)\s*$/i);
       if (m) {
         const state = m[2].toLowerCase();                 // "opens" | "closes"
-        const label = state === "opens" ? "Quiz opens" : "Quiz closes";
+        const label = state === "opens" ? "Quiz open" : "Quiz close";
         return `<div class="quiz-line"><span class="quiz-pill ${state}">${label}</span>${richText(m[1])}</div>`;
       }
       return `<div class="quiz-line"><span class="quiz-pill quiz">Quiz</span>${richText(l)}</div>`;
