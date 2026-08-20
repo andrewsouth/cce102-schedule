@@ -267,9 +267,13 @@
       vertical-align: 1px;
     }
     .hw-pill { background: rgba(0, 71, 186, 0.10); color: var(--byu-royal); }
-    /* Quizzes & Exams pills — royal blue for quizzes, navy for exams */
-    .quiz-pill.quiz { background: rgba(0, 71, 186, 0.10); color: var(--byu-royal); }
-    .quiz-pill.exam { background: rgba(0, 46, 93, 0.12);  color: var(--byu-navy); }
+    /* Quizzes & Exams pills — "Quiz opens" green (window starting, like
+       Begin), "Quiz closes" amber (deadline, like Due), navy for exams,
+       royal blue for a quiz line with no open/close state. */
+    .quiz-pill.opens  { background: rgba(56, 135, 12, 0.12); color: #2a6a08; }
+    .quiz-pill.closes { background: rgba(186, 117, 23, 0.14); color: #854F0B; }
+    .quiz-pill.quiz   { background: rgba(0, 71, 186, 0.10); color: var(--byu-royal); }
+    .quiz-pill.exam   { background: rgba(0, 46, 93, 0.12);  color: var(--byu-navy); }
     /* Project Benchmark pills — color reflects the first word of the cell:
        "Begin" → green (forward / starting),
        "Due"   → amber (deadline / wrap-up).
@@ -808,14 +812,24 @@
     }
     return head + restLines;
   }
-  // Quizzes & Exams cell — each line gets a QUIZ or EXAM pill (navy for
-  // exams, royal for quizzes) followed by the line text.
+  // Quizzes & Exams cell — each line gets a pill. Lines ending in
+  // "opens"/"closes" get a green "Quiz opens" or amber "Quiz closes"
+  // pill, with the redundant "Quiz opens/closes" trimmed from the text.
+  // Lines mentioning an exam get a navy EXAM pill; anything else falls
+  // back to a royal-blue QUIZ pill.
   function quizPillHTML(text) {
     const lines = text.split("\n").map(s => s.trim()).filter(Boolean);
     return lines.map(l => {
-      const type = /exam/i.test(l) ? "exam" : "quiz";
-      const label = type === "exam" ? "Exam" : "Quiz";
-      return `<div class="quiz-line"><span class="quiz-pill ${type}">${label}</span>${richText(l)}</div>`;
+      if (/exam/i.test(l)) {
+        return `<div class="quiz-line"><span class="quiz-pill exam">Exam</span>${richText(l)}</div>`;
+      }
+      const m = l.match(/^(.*?)\s*(?:quiz\s+)?(opens|closes)\s*$/i);
+      if (m) {
+        const state = m[2].toLowerCase();                 // "opens" | "closes"
+        const label = state === "opens" ? "Quiz opens" : "Quiz closes";
+        return `<div class="quiz-line"><span class="quiz-pill ${state}">${label}</span>${richText(m[1])}</div>`;
+      }
+      return `<div class="quiz-line"><span class="quiz-pill quiz">Quiz</span>${richText(l)}</div>`;
     }).join("");
   }
 
