@@ -503,16 +503,16 @@
 
     /* Case-study rows — soft tint across the row plus an explicit chip
        above the topic so the thread is unmistakable at a glance. */
-    table.schedule tbody tr.case-row td { background: #FBF3EE !important; }
+    table.schedule tbody tr.case-row td { background: #F5F1FA !important; }   /* pale lavender, matches the Built Environment box */
     .case-chip {
       display: block;
       width: max-content;
       margin-bottom: 5px;
       padding: 1px 9px;
-      border: 1px solid #D9906F;
+      border: 1px solid #A78BD6;
       border-radius: 999px;
       background: #fff;
-      color: #A84B24;
+      color: #5B3E99;
       font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -1156,12 +1156,12 @@
       const hasBench = !!bench;
       const hasAssigned = hasHW || hasBench;
 
-      // Case Study and Ethics sessions adopt the Stewardship (Ch 1) coral
-      // band regardless of which chapter they sit in. This makes the
-      // through-line of stewardship-flavored sessions visually continuous,
-      // even when they recur inside other chapters or the appendix.
+      // Case Study and Ethics sessions take a lavender band (matching the
+      // "Built Environment" box in the concept map) regardless of which
+      // chapter they sit in, so the case-study thread reads as its own
+      // distinct color wherever it recurs.
       let chapColor = chapterColor(chapter);
-      if (isSuppressed) chapColor = "#FAECE7";
+      if (isSuppressed) chapColor = "#E4DBF3";   /* lavender date band for case studies */
       const styleVars = [];
       if (color)     styleVars.push(`--theme-color: ${color}`);
       if (chapColor) styleVars.push(`--chapter-color: ${chapColor}`);
